@@ -3,7 +3,7 @@ require "logger"
 
 logfile = "logbot.log"
 #logfile = Time.now.strftime("log-%Y%m%d-%H%M%S") + ".log"
-File.delete(logfile)
+File.delete(logfile) if File.exist?(logfile)
 $LOG = Logger.new(logfile);
 
 Bitstamp.setup do |config|
