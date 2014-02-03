@@ -12,12 +12,12 @@ Bitstamp.setup do |config|
   config.client_id = ENV['BITSTAMP_CLIENT_ID'] 
 end
 
-buy_max_price = 772.5
-buy_max_amount = 0.05
-profitPercentage = 0.55
+buy_max_price = 804.0
+buy_max_amount = 0.02
+profitPercentage = 0.50
 commissionPercentage = 0.50
 tickEverySecs = 5
-retries = 10
+retries = 50
 
 # check if last price is below buy_max_price every 60 secs
 attempt = 0
@@ -33,11 +33,8 @@ rescue StandardError => se
   $LOG.info "Didn't place buy order of #{buy_max_amount} BTC at <= #{buy_max_price} dollars with attempt ##{attempt + 1}"
   attempt += 1
   sleep 0.1
-  if attempt < retries 
-    retry
-  else
-    raise se
-  end
+  retry if attempt < retries 
+  raise se
 end
 
 
@@ -52,7 +49,7 @@ puts "Placed Order: Buy #{buy_max_amount} at #{tick.last}"
 #       buy price!)
 percentageMultiplier = 1 + commissionPercentage*2.0/100.0 + profitPercentage/100
 sellPrice = tick.last.to_f * percentageMultiplier
-$LOG.info "Will try to sell at #{sellPrice} for a #{percentageMultiplier - 1}% percentage profit"
+$LOG.info "Will try to sell at #{sellPrice} for a #{profitPercentage}% percentage profit"
 
 # check if last price is above calculated sellPrice every 60 secs
 attempt = 0
@@ -68,11 +65,8 @@ rescue StandardError => se
   $LOG.info "Didn't place sell order of #{buy_max_amount} BTC at #{sellPrice} dollars with attempt ##{attempt+1}"
   attempt += 1
   sleep 0.1
-  if attempt < retries
-    retry
-  else
-    raise se
-  end
+  retry if attempt < retries
+  raise se
 end
 
 # sell buy_max bitcoins at sellPrice
